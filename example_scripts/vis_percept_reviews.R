@@ -2,7 +2,7 @@
 ## Things to address:
 
 # min_dist function for V-shaped tunnel
-get_min_dist_v <- function(obj_name,
+calc_min_dist_v <- function(obj_name,
                            simplify = TRUE){
 
   ## Check that it's a viewr object
@@ -87,24 +87,27 @@ get_min_dist_v <- function(obj_name,
            obj_name$min_dist_neg)
            # return original min_dist_neg calculation
 
- ## for simplify = TRUE
+  ## Leave note that minimum distances were calculated
+  attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
+                                         "min_dist_calculated")
+
+  ## for simplify = TRUE
   obj_simplify$min_dist_pos <- obj_name$min_dist_pos
   obj_simplify$min_dist_neg <- obj_name$min_dist_neg
-
 
   if(simplify = TRUE){
     return(obj_simplify)
   } else {
     return(obj_name)
-    }
+  }
 }
 
 
 ## min_dist function for box shaped chamber
-## I believe the ifelse statements for calculating min_dist are necessasry - the
+## I believe the ifelse statements for calculating min_dist are necessary - the
 ## reviewer's suggestion doesn't work as required.
 
-get_min_dist_box <- function(obj_name){
+calc_min_dist_box <- function(obj_name){
 
   ## Check that it's a viewr object
   if (!any(attr(obj_name,"pathviewR_steps") == "viewr")) {
@@ -130,12 +133,30 @@ get_min_dist_box <- function(obj_name){
            abs(obj_name$neg_wall - obj_name$position_width) # FALSE
     )
 
+  ## Leave note that minimum distances were calculated
+  attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
+                                         "min_dist_calculated")
+
+
   return(obj_name)
 }
 
 
-}
+## get_vis_angle
+get_vis_angle <- function(obj_name){
 
+  ## Check that it's a viewr object
+  if (!any(attr(obj_name,"pathviewR_steps") == "viewr")){
+    stop("This doesn't seem to be a viewr object")
+  }
+
+  ## Check that calc_min_dist() has been run
+  if (!any(attr(obj_name,"pathviewR_steps") == "min_dist_v_calculated")){
+    stop("Please calculate minimum distances prior to use")
+  }
+
+
+}
 
 
 
