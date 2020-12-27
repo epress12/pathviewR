@@ -165,7 +165,7 @@ get_vis_angle <- function(obj_name){
   obj_name$vis_angle_pos_deg <- rad_2_deg(obj_name$vis_angle_pos_rad) # degrees
   obj_name$vis_angle_neg_deg <- rad_2_deg(obj_name$vis_angle_neg_rad) # degree
 
-  ## leave a note that visual angles were calculated
+  ## Leave a note that visual angles were calculated
   attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
                                          "vis_angles_calculated")
   return(obj_name)
@@ -189,6 +189,11 @@ get_sf <- function(obj_name){
   obj_name$sf_pos <- 1/vis_angle_pos_deg
   obj_name$sf_neg <- 1/vis_angle_neg_deg
 
+  ## Leave a note that visual angles were calculated
+  attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
+                                         "sf_calculated")
+
+
   return(obj_name)
 }
 
@@ -210,6 +215,10 @@ get_tf <- function(obj_name){
   obj_name$tf_pos <- abs(length_inst_vel)/(min_dist_pos*vis_angle_pos_rad)
   obj_name$tf_neg <- abs(length_inst_vel)/(min_dist_neg*vis_angle_neg_rad)
 
+  ## Leave a note that visual angles were calculated
+  attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
+                                         "tf_calculated")
+
   return(obj_name)
 }
 
@@ -218,6 +227,29 @@ get_tf <- function(obj_name){
 
 get_pattern_velocity <- function(obj_name){
 
+  ## Check that it's a viewr object
+  if (!any(attr(obj_name,"pathviewR_steps") == "viewr")){
+    stop("This doesn't seem to be a viewr object")
+  }
+
+  ## Check that get_vis_angle() has been run
+  if (!any(attr(obj_name,"pathviewR_steps") == "vis_angles_calculated")){
+    stop("Please run get_vis_angle() prior to use")
+  }
+
+  ## Check that get_sf() and get_tf() have been run
+  if (!any(attr(obj_name, "pathviewR_steps") == "sf_calculated" |
+                                                "tf_calculated")){
+    stop("Please run get_sf() and get_tf() prior to use")
+  }
+
+  obj_name$pattern_vel_pos <- tf_pos/sf_pos
+  obj_name$pattern_vel_neg <- tf_neg/sf_neg
+
+  attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
+                                         "pattern_vel_calculated")
+
+  return(obj_name)
 }
 
 
