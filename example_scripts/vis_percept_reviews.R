@@ -129,8 +129,8 @@ calc_min_dist_box <- function(obj_name){
 
   obj_name$min_dist_neg <-
     ifelse(obj_name$position_width <= 0, # if in negative side of tunnel
-           abs(obj_name$neg_wall) - abs(obj_name$position_width), # TRUE
-           abs(obj_name$neg_wall - obj_name$position_width) # FALSE
+           abs(obj_name$neg_wall + obj_name$position_width), # TRUE
+           abs(obj_name$neg_wall) + obj_name$position_width # FALSE
     )
 
   ## Leave note that minimum distances were calculated
@@ -151,12 +151,75 @@ get_vis_angle <- function(obj_name){
   }
 
   ## Check that calc_min_dist() has been run
-  if (!any(attr(obj_name,"pathviewR_steps") == "min_dist_v_calculated")){
+  if (!any(attr(obj_name,"pathviewR_steps") == "min_dist_calculated")){
     stop("Please calculate minimum distances prior to use")
   }
 
+  ## Calculate visual angles (radians and degrees) using distance to
+  ## positive and negative screens. Add these variables into the dataframe.
+  obj_name$vis_angle_pos_rad <-
+    2*atan(obj_name$stim_param_pos/(2*obj_name$min_dist_pos)) # radians
+  obj_name$vis_angle_neg_rad <-
+    2*atan(obj_name$stim_param_neg/(2*obj_name$min_dist_neg)) # radians
+
+  obj_name$vis_angle_pos_deg <- rad_2_deg(obj_name$vis_angle_pos_rad) # degrees
+  obj_name$vis_angle_neg_deg <- rad_2_deg(obj_name$vis_angle_neg_rad) # degree
+
+  ## leave a note that visual angles were calculated
+  attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
+                                         "vis_angles_calculated")
+  return(obj_name)
+}
+
+## get_sf
+
+get_sf <- function(obj_name){
+
+  ## Check that it's a viewr object
+  if (!any(attr(obj_name,"pathviewR_steps") == "viewr")){
+    stop("This doesn't seem to be a viewr object")
+  }
+
+  ## Check that get_vis_angle() has been run
+  if (!any(attr(obj_name,"pathviewR_steps") == "vis_angles_calculated")){
+    stop("Please run get_vis_angle() prior to use")
+  }
+
+  ## spatial frequency (cycles/rad) is the inverse of visual angle (rad/cycle)
+  obj_name$sf_pos <- 1/vis_angle_pos_deg
+  obj_name$sf_neg <- 1/vis_angle_neg_deg
+
+  return(obj_name)
+}
+
+get_tf <- function(obj_name){
+
+  ## Check that it's a viewr object
+  if (!any(attr(obj_name,"pathviewR_steps") == "viewr")){
+    stop("This doesn't seem to be a viewr object")
+  }
+
+  ## Check that get_vis_angle() has been run
+  if (!any(attr(obj_name,"pathviewR_steps") == "vis_angles_calculated")){
+    stop("Please run get_vis_angle() prior to use")
+  }
+
+  ## Temporal frequency (cycles/second) is calculated from the axis-specific
+  ## instantaneous velocity of the subject and the arc length of the cycle
+  ## from the subject's perspective
+  obj_name$tf_pos <- abs(length_inst_vel)/(min_dist_pos*vis_angle_pos_rad)
+  obj_name$tf_neg <- abs(length_inst_vel)/(min_dist_neg*vis_angle_neg_rad)
+
+  return(obj_name)
+}
+
+
+## get_pattern_velocity
+
+get_pattern_velocity <- function(obj_name){
 
 }
+
 
 
 
