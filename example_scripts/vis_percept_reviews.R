@@ -225,7 +225,7 @@ get_tf <- function(obj_name){
 
 ## get_pattern_velocity
 
-get_pattern_velocity <- function(obj_name){
+get_pattern_vel <- function(obj_name){
 
   ## Check that it's a viewr object
   if (!any(attr(obj_name,"pathviewR_steps") == "viewr")){
@@ -252,6 +252,39 @@ get_pattern_velocity <- function(obj_name){
   return(obj_name)
 }
 
+
+## get image expansion
+
+get_image_expansion <- function(obj_name){
+
+  ## Check that it's a viewr object
+  if (!any(attr(obj_name,"pathviewR_steps") == "viewr")){
+    stop("This doesn't seem to be a viewr object")
+  }
+
+  ## Check that get_vis_angle() has been run
+  if (!any(attr(obj_name,"pathviewR_steps") == "vis_angles_calculated")){
+    stop("Please run get_vis_angle() prior to use")
+  }
+
+  ## Convert obj_name to data.frame for diff functions
+  obj_name <- as.data.frame(obj_name)
+
+  ## Get relevant frame-by-frame differences
+  time_diff <- c(NA, diff(obj_name[,"time_sec"]))
+  pos_angle_diff <- c(NA, diff(obj_name[,"vis_angle_pos_deg"]))
+  neg_angle_diff <- c(NA, diff(obj_name[,"vis_angle_neg_deg"]))
+
+  obj_name$expansion_pos <- pos_angle_diff/time_diff
+  obj_name$expansion_neg <- neg_angle_diff/time_diff
+  obj_name$time_diff <- time_diff
+
+  ## Leave note that image expansion was calculated
+  attr(obj_name, "pathviewR_steps") <- c(attr(obj_name, "pathviewR_steps"),
+                                              "image_expansion_calculated")
+
+  return(obj_name)
+}
 
 
 
