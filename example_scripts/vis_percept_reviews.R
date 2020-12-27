@@ -1,8 +1,7 @@
 ## work space for addressing visual perception functions reivews
 ## Things to address:
+
 # make calc_min_dist function and then use this to employ the other functions
-
-
 get_min_dist_v <- function(obj_name,
                            simplify = TRUE){
 
@@ -18,6 +17,7 @@ get_min_dist_v <- function(obj_name,
 
   ## duplicate object for simplify = TRUE
   obj_simplify <- obj_name
+
 
   ## Introduce variables for vertical_2_vertex and vertical_2_screen
   ## vertical_2_vertex and vertical_2_screen refer to the vertical distance
@@ -46,14 +46,15 @@ get_min_dist_v <- function(obj_name,
            (obj_name$vertical_2_screen * tan(obj_name$vertex_angle)) +
              (2 * abs(obj_name$position_width))) # FALSE
 
+
   ## Introduce variable min_dist on positive and negative sides of the
   ## tunnel. min_dist refers to the minimum distance between the bird and either
   ## screen (axis of gaze is orthogonal to plane of each screen)
   obj_name$min_dist_pos <-
-    obj_name$horizontal_2_screen_pos * sin((pi/2) - obj_name$vertex_angle)
+    obj_name$horizontal_2_screen_pos * sin(pi/2 - obj_name$vertex_angle)
   # min_dist to positive screen
   obj_name$min_dist_neg <-
-    obj_name$horizontal_2_screen_neg * sin((pi/2) - obj_name$vertex_angle)
+    obj_name$horizontal_2_screen_neg * sin(pi/2 - obj_name$vertex_angle)
   # min_dist to negative screen
 
 
@@ -75,7 +76,7 @@ get_min_dist_v <- function(obj_name,
            sqrt(obj_name$vertical_2_vertex^2 + obj_name$position_width^2),
            # return distance to vertex
            obj_name$min_dist_pos)
-  # reurn original min_dist_pos calculation
+           # return original min_dist_pos calculation
 
   obj_name$min_dist_neg <-
     ifelse(obj_name$position_width >= 0 &
@@ -84,6 +85,16 @@ get_min_dist_v <- function(obj_name,
            sqrt(obj_name$vertical_2_vertex^2 + obj_name$position_width^2),
            # return distance to vertex
            obj_name$min_dist_neg)
-  # return original min_dist_neg calculation
+           # return original min_dist_neg calculation
 
+ ## for simplify = TRUE
+  obj_simplify$min_dist_pos <- obj_name$min_dist_pos
+  obj_simplify$min_dist_neg <- obj_name$min_dist_neg
+
+
+  if(simplify = TRUE){
+    return(obj_simplify)
+  } else {
+    return(obj_name)
+    }
 }
