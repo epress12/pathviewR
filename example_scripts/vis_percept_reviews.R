@@ -1,0 +1,89 @@
+## work space for addressing visual perception functions reivews
+## Things to address:
+# make calc_min_dist function and then use this to employ the other functions
+
+
+get_min_dist_v <- function(obj_name,
+                           simplify = TRUE){
+
+  ## Check that it's a viewr object
+  if (!any(attr(obj_name,"pathviewR_steps") == "viewr")){
+    stop("This doesn't seem to be a viewr object")
+  }
+
+  ## Check that insert_treatments() has been run
+  if (!any(attr(obj_name,"pathviewR_steps") == "treatments_added")){
+    stop("Please run insert_treatments() prior to use")
+  }
+
+  ## duplicate object for simplify = TRUE
+  obj_simplify <- obj_name
+
+  ## Introduce variables for vertical_2_vertex and vertical_2_screen
+  ## vertical_2_vertex and vertical_2_screen refer to the vertical distance
+  ## between the subject's position and the the vertex of the tunnel and screen
+  ## below them, respectively.
+  obj_name$vertical_2_vertex <-
+    abs(obj_name$perch_2_vertex) + obj_name$position_height
+  obj_name$vertical_2_screen <-
+    obj_name$vertical_2_vertex -
+    (abs(obj_name$position_width) / tan(obj_name$vertex_angle))
+
+
+  ## Introduce variables for horizontal_2_screen on positive and negative sides
+  ## of the tunnel.
+  ## horizontal_2_screen refers to the horizontal distance between the bird and
+  ## either screen.
+  obj_name$horizontal_2_screen_pos <-
+    ifelse(obj_name$position_width >= 0, # if in positive side of tunnel
+           obj_name$vertical_2_screen * tan(obj_name$vertex_angle), # TRUE
+           (obj_name$vertical_2_screen * tan(obj_name$vertex_angle)) +
+             (2 * abs(obj_name$position_width))) # FALSE
+
+  obj_name$horizontal_2_screen_neg <-
+    ifelse(obj_name$position_width < 0, # if in negative side of tunnel
+           obj_name$vertical_2_screen * tan(obj_name$vertex_angle), # TRUE
+           (obj_name$vertical_2_screen * tan(obj_name$vertex_angle)) +
+             (2 * abs(obj_name$position_width))) # FALSE
+
+  ## Introduce variable min_dist on positive and negative sides of the
+  ## tunnel. min_dist refers to the minimum distance between the bird and either
+  ## screen (axis of gaze is orthogonal to plane of each screen)
+  obj_name$min_dist_pos <-
+    obj_name$horizontal_2_screen_pos * sin((pi/2) - obj_name$vertex_angle)
+  # min_dist to positive screen
+  obj_name$min_dist_neg <-
+    obj_name$horizontal_2_screen_neg * sin((pi/2) - obj_name$vertex_angle)
+  # min_dist to negative screen
+
+
+  ## When the subject is outside the boundaries created by orthogonal planes to
+  ## each wall, erroneous visual angles are calculated.
+  ## Therefore we must adjust min_dist values according to position_width
+
+  ## Create variable holding the boundary values for each observation
+  obj_name$bound_pos <-
+    obj_name$vertical_2_vertex * tan(pi/2 - obj_name$vertex_angle)
+  obj_name$bound_neg <-
+    obj_name$vertical_2_vertex * -tan(pi/2 - obj_name$vertex_angle)
+
+
+  obj_name$min_dist_pos <- # overwrite min_dist_pos
+    ifelse(obj_name$position_width <= 0 &
+             obj_name$position_width <= obj_name$bound_neg,
+           # if position_width is positive and greater than the boundary value
+           sqrt(obj_name$vertical_2_vertex^2 + obj_name$position_width^2),
+           # return distance to vertex
+           obj_name$min_dist_pos)
+  # reurn original min_dist_pos calculation
+
+  obj_name$min_dist_neg <-
+    ifelse(obj_name$position_width >= 0 &
+             obj_name$position_width >= obj_name$bound_pos,
+           # if position_width is negative and smaller than the boundary value
+           sqrt(obj_name$vertical_2_vertex^2 + obj_name$position_width^2),
+           # return distance to vertex
+           obj_name$min_dist_neg)
+  # return original min_dist_neg calculation
+
+}
