@@ -1,7 +1,7 @@
 ## work space for addressing visual perception functions reivews
 ## Things to address:
 
-# make calc_min_dist function and then use this to employ the other functions
+# min_dist function for V-shaped tunnel
 get_min_dist_v <- function(obj_name,
                            simplify = TRUE){
 
@@ -98,3 +98,50 @@ get_min_dist_v <- function(obj_name,
     return(obj_name)
     }
 }
+
+
+## min_dist function for box shaped chamber
+## I believe the ifelse statements for calculating min_dist are necessasry - the
+## reviewer's suggestion doesn't work as required.
+
+get_min_dist_box <- function(obj_name){
+
+  ## Check that it's a viewr object
+  if (!any(attr(obj_name,"pathviewR_steps") == "viewr")) {
+    stop("This doesn't seem to be a viewr object")
+  }
+
+  ## Check that insert_treatments() has been run
+  if (!any(attr(obj_name,"pathviewR_steps") == "treatments_added")){
+    stop("Please run insert_treatments() prior to use")
+  }
+
+  ## Calculate minimum distance to each wall from positive or negative sides of
+  ## tunnel
+  obj_name$min_dist_pos <-
+    ifelse(obj_name$position_width >= 0, # if in positive side of tunnel
+           obj_name$pos_wall - obj_name$position_width, # TRUE
+           obj_name$pos_wall + abs(obj_name$position_width) # FALSE
+    )
+
+  obj_name$min_dist_neg <-
+    ifelse(obj_name$position_width <= 0, # if in negative side of tunnel
+           abs(obj_name$neg_wall) - abs(obj_name$position_width), # TRUE
+           abs(obj_name$neg_wall - obj_name$position_width) # FALSE
+    )
+
+  return(obj_name)
+}
+
+
+}
+
+
+
+
+
+
+
+
+
+
